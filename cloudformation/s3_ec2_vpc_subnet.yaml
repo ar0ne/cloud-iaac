@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: A CF template that creates S3 bucket, EC2, VPC, subnet along with parameters and metadata
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Compute configuration"
+        Parameters:
+          - EC2InstanceType
+          - EC2AMID
+      -
+        Label:
+          default: "Storage configuration"
+        Parameters:
+          - S3BucketName
+      -
+        Label:
+          default: "Network configuration"
+        Parameters:
+          - VpcCIDR
+          - SubnetCIDR
+
+Parameters:
+  EC2InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.nano
+    Description: Enter t2.micro or t2.nano. Default is t2.micro.
+
+  EC2AMID:
+    Type: String
+    Default: ami-06c68f701d8090592
+    AllowedValues:
+      - ami-06c68f701d8090592
+      - ami-04a81a99f5ec58529
+    Description: Enter Amazon Linux (ami-06c68f701d8090592) or Ubuntu (ami-04a81a99f5ec58529). Amazon Linux is default.
+
+  S3BucketName:
+    Type: String
+
+  VpcCIDR:
+    Type: String
+    Default: 10.0.0.0/16
+    AllowedValues:
+      - 10.0.0.0/16
+      - 172.31.0.0/16
+
+  SubnetCIDR:
+    Type: String
+    Default: 10.0.1.0/24
+    AllowedValues:
+      - 10.0.1.0/24
+      - 10.0.2.0/24
+
+Resources:
+  TestS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref S3BucketName
+      Tags:
+        - Key: Project
+          Value: Banking
+
+  TestEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref EC2AMID
+      InstanceType: !Ref EC2InstanceType
+      Tags:
+        - Key: Project
+          Value: Banking
+
+  TestVPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Project
+          Value: Banking
+
+  TestSubnet:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: !Ref SubnetCIDR
+      Tags:
+        - Key: Project
+          Value: Banking
+      VPCId: !Ref TestVPC
+      
+

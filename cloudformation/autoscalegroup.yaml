@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: A template that creates autoscalegroup and elb
+
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.nano
+    Description: Enter t2.micro or t2.nano. Default is t2.micro.
+
+  ImageId:
+    Type: String
+    Default: ami-06c68f701d8090592
+    AllowedValues:
+      - ami-06c68f701d8090592
+      - ami-04a81a99f5ec58529
+    Description: Enter Amazon Linux (ami-06c68f701d8090592) or Ubuntu (ami-04a81a99f5ec58529). Amazon Linux is default.
+
+Resources:
+  WebLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref ImageId 
+      InstanceType: !Ref InstanceType
+      LaunchConfigurationName: WebserverConfiguration
+      SecurityGroups: 
+        - sg-123
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum update -y
+          yum install -y httpd.x86_64
+          systemctl start httpd.service
+          systemctl enable httpd.service
+          usermod -a -G apache ec2-user
+          chown -R ec2-user:apache /var/www
+          chmod 2775 /var/www
+          find /var/www -type d -exec chmod 2775 {} \;
+          find /var/www -type f -exec chmod 0664 {} \;
+          echo "hello world from ${AWS::Region}" > /var/www/html/index.html
+
+  WebAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      DesiredCapacity: 1
+      LaunchConfigurationName: !Ref WebLaunchConfiguration
+      MaxSize: 2
+      MinSize: 1
+      VPCZoneIdentifier:
+        - subnet-123
+        - subnet-234
+      AvailabilityZones: 
+        - us-east-1a
+        - us-east-1c

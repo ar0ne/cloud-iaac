@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: A CF template that creates S3 bucket and EC2 along with parameters
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Compute configuration"
+        Parameters:
+          - EC2InstanceType
+          - EC2AMID
+      -
+        Label:
+          default: "Storage configuration"
+        Parameters:
+          - S3BucketName
+
+Parameters:
+  EC2InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.nano
+    Description: Enter t2.micro or t2.nano. Default is t2.micro.
+
+  EC2AMID:
+    Type: String
+    Default: ami-06c68f701d8090592
+    AllowedValues:
+      - ami-06c68f701d8090592
+      - ami-04a81a99f5ec58529
+    Description: Enter Amazon Linux (ami-06c68f701d8090592) or Ubuntu. Amazon Linux is default.
+
+  S3BucketName:
+    Type: String
+
+
+Resources:
+  TestS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref S3BucketName
+      Tags:
+        - Key: hello
+          Value: world
+
+  MyDummyEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref EC2AMID
+      InstanceType: !Ref EC2InstanceType

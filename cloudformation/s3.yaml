@@ -1,0 +1,12 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: A first CF template that creates S3 bucket
+
+Resources:
+  TestS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: mytempbucket0123jdnwajdwnjdanwdjwndj
+      Tags:
+        - Key: hello
+          Value: world

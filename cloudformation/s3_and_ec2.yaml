@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: A CF template that creates S3 bucket and EC2
+
+Parameters:
+  Environment:
+    Type: String
+    Default: test
+    AllowedValues:
+      - test
+      - prod
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      test: ami-06c68f701d8090592
+      prod: ami-04a81a99f5ec58529
+    eu-west-1:
+      test: ami-0b995c42184e99f98
+      prod: ami-0b995c42184e99f98
+
+Conditions:
+  CreateS3BucketOnProduction: !Equals
+    - !Ref Environment
+    - prod
+
+Resources:
+  TestS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Condition: CreateS3BucketOnProduction
+    Properties:
+      BucketName: mytempbucket0123helloworld
+
+  MyDummyEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - !Ref Environment
+      InstanceType: t2.micro
